@@ -179,11 +179,16 @@ def clean(extractor, text, expand_templates=False, html_safe=True):
         # Turn into text what is left (&amp;nbsp;) and <syntaxhighlight>
         text = unescape(text)
 
+    formula_dict = {}
+
     # Expand placeholders
     for pattern, placeholder in placeholder_tag_patterns:
         index = 1
         for match in pattern.finditer(text):
-            text = text.replace(match.group(), "%s_%d" % (placeholder, index))
+            match_ = match.group()
+            if pattern == "math":
+                formula_dict["%s_%d" % (placeholder, index)] = match_
+            text = text.replace(match_, "%s_%d" % (placeholder, index))
             index += 1
 
     text = text.replace("<<", "«").replace(">>", "»")
@@ -202,7 +207,7 @@ def clean(extractor, text, expand_templates=False, html_safe=True):
     text = text.replace(",,", ",").replace(",.", ".")
     if html_safe:
         text = html.escape(text, quote=False)
-    return text
+    return text, formula_dict
 
 
 # skip level 1, it is page name level
@@ -1069,12 +1074,12 @@ class Extractor:
         self.magicWords["currenthour"] = time.strftime("%H")
         self.magicWords["currenttime"] = time.strftime("%H:%M:%S")
 
-        text = clean(
+        text, formula_dict = clean(
             self, text, expand_templates=expand_templates, html_safe=html_safe
         )
 
         text = compact(text, mark_headers=mark_headers)
-        return text
+        return text, formula_dict
 
     def extract(self, out, html_safe=True):
         """
@@ -1083,7 +1088,7 @@ class Extractor:
         """
         logging.debug("%s\t%s", self.id, self.title)
         text = "".join(self.page)
-        text = self.clean_text(text, html_safe=html_safe)
+        text, formula_dict = self.clean_text(text, html_safe=html_safe)
 
         if self.to_json:
             json_data = {
@@ -1092,6 +1097,7 @@ class Extractor:
                 "url": self.url,
                 "title": self.title,
                 "text": "\n".join(text),
+                "formulas": formula_dict,
             }
             out_str = json.dumps(json_data)
             out.write(out_str)
