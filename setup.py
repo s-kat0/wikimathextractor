@@ -1,41 +1,43 @@
-from setuptools import setup, find_packages
 import re
 
-from wikiextractor.WikiExtractor import __version__
+from setuptools import find_packages, setup
+
+from wikimathextractor.WikiMathExtractor import __version__
 
 
 def get_version(version):
-    if re.match(r'^\d+\.\d+$', version):
-        return version + '.0'
+    if re.match(r"^\d+\.\d+$", version):
+        return version + ".0"
     return version
+
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name='wikiextractor',
+    name="wikimathextractor",
     version=get_version(__version__),
-    author='Giuseppe Attardi',
-    author_email='attardi@gmail.com',
-    description='A tool for extracting plain text from Wikipedia dumps',
+    author="Giuseppe Attardi",
+    author_email="attardi@gmail.com",
+    description="A tool for extracting plain text from Wikipedia dumps",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    license='GNU Affero General Public License',
+    license="GNU Affero General Public License",
     install_requires=[],
-    url="https://github.com/attardi/wikiextractor",
-    packages=find_packages(include=["wikiextractor"]),
+    url="https://github.com/stktu/wikimathextractor",
+    packages=find_packages(include=["wikimathextractor"]),
     classifiers=[
-        'Development Status :: 5 - Production/Stable',
-        'Intended Audience :: Developers',
-        'Topic :: Text Processing :: Linguistic',
-        'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)',
-        'Programming Language :: Python :: 3'
-     ],
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Developers",
+        "Topic :: Text Processing :: Linguistic",
+        "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+        "Programming Language :: Python :: 3",
+    ],
     entry_points={
         "console_scripts": [
-            "wikiextractor = wikiextractor.WikiExtractor:main",
-            "extractPage = wikiextractor.extractPage:main",
-            ]
-        },
-    python_requires='>=3.6',
+            "wikimathextractor = wikimathextractor.WikiMathExtractor:main",
+            "extractPage = wikimathextractor.extractPage:main",
+        ]
+    },
+    python_requires=">=3.6",
 )

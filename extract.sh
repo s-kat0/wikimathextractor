@@ -14,7 +14,7 @@ PROCESSES=$2
 TEMPLATES=$3
 OUTPUT=$4
 
-python -m wikiextractor.WikiExtractor.py $INPUT \
+python -m wikimathextractor.WikiMathExtractor.py $INPUT \
        --json \
        --processes $PROCESSES \
        --templates $TEMPLATES \

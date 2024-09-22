@@ -16,7 +16,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # =============================================================================
 
-from wikiextractor.extract import Extractor, ignoreTag, resetIgnoredTags
+from wikimathextractor.extract import Extractor, ignoreTag, resetIgnoredTags
 
 
 def clean_markup(markup, keep_links=False, ignore_headers=True):
@@ -25,7 +25,7 @@ def clean_markup(markup, keep_links=False, ignore_headers=True):
 
     :param keep_links: Set to True to keep internal and external links
     :param ignore_headers: if set to True, the output list will not contain
-    headers, only 
+    headers, only
 
     Returns a list of paragraphs (unicode strings).
     """
