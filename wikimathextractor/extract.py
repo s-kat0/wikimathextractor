@@ -186,7 +186,7 @@ def clean(extractor, text, expand_templates=False, html_safe=True):
         index = 1
         for match in pattern.finditer(text):
             match_ = match.group()
-            if pattern == "math":
+            if placeholder == "formula":
                 formula_dict["%s_%d" % (placeholder, index)] = match_
             text = text.replace(match_, "%s_%d" % (placeholder, index))
             index += 1
