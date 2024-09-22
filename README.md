@@ -1,3 +1,15 @@
+# Wikimathextractor
+
+Wikimathextractor is based on the original [WikiExtractor](https://github.com/attardi/wikiextractor) project.e
+
+This repository introduces an additional feature that allows the extraction of Wikipedia pages containing Math elements (<math> tags) in addition to the standard text extraction functionality.
+
+Wikimathextractor can be used to extract and clean text from a Wikipedia database backup dump (e.g., enwiki-latest-pages-articles.xml.bz2 for English), while identifying and preserving the pages that include mathematical content.
+
+
+---
+The following is an explanation of WikiExtractor.
+
 # WikiExtractor
 [WikiExtractor.py](http://medialab.di.unipi.it/wiki/Wikipedia_Extractor) is a Python script that extracts and cleans text from a [Wikipedia database backup dump](https://dumps.wikimedia.org/), e.g. https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2 for English.
 
@@ -69,8 +81,8 @@ Each file will contain several documents in the format:
 	    ...
 	    </doc>
 
-If the program is invoked with the --json flag, then each file will                                            
-contain several documents formatted as json ojects, one per line, with                                         
+If the program is invoked with the --json flag, then each file will
+contain several documents formatted as json ojects, one per line, with
 the following structure
 
 	{"id": "", "revid": "", "url": "", "title": "", "text": "..."}
@@ -179,7 +191,7 @@ optional arguments:
 ~~~
 
 ## License
-The code is made available under the [GNU Affero General Public License v3.0](LICENSE). 
+The code is made available under the [GNU Affero General Public License v3.0](LICENSE).
 
 ## Reference
 If you find this code useful, please refer it in publications as:
