@@ -17,9 +17,9 @@ with open("README.md", "r") as fh:
 setup(
     name="wikimathextractor",
     version=get_version(__version__),
-    author="Giuseppe Attardi",
-    author_email="attardi@gmail.com",
-    description="A tool for extracting plain text from Wikipedia dumps",
+    author="Shota Kato",
+    author_email="shota@human.sys.i.kyoto-u.ac.jp",
+    description="A tool for extracting plain text and mathematical formulas from Wikipedia dumps",
     long_description=long_description,
     long_description_content_type="text/markdown",
     license="GNU Affero General Public License",
