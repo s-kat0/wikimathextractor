@@ -43,8 +43,8 @@ Each file will contain several documents in the format:
         ...
         </doc>
 
-If the program is invoked with the --json flag, then each file will                                            
-contain several documents formatted as json ojects, one per line, with                                         
+If the program is invoked with the --json flag, then each file will
+contain several documents formatted as json ojects, one per line, with
 the following structure
 
     {"id": "", "revid": "", "url": "", "title": "", "text": "..."}
@@ -96,20 +96,6 @@ modules = {
         'convert': lambda x, u, *rest: x + ' ' + u,  # no conversion
     }
 }
-# ----------------------------------------------------------------------
-# Expand using WikiMedia API
-# import json
-
-# def expandTemplates(text):
-#     """Expand templates invoking MediaWiki API"""
-#     text = urlib.urlencodew(text)
-#     base = urlbase[:urlbase.rfind('/')]
-#     url = base + "/w/api.php?action=expandtemplates&format=json&text=" + text
-#     exp = json.loads(urllib.urlopen(url))
-#     return exp['expandtemplates']['*']
-
-# ------------------------------------------------------------------------------
-# Output
 
 
 class NextFile():
