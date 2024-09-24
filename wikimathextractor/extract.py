@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # =============================================================================
-#  Copyright (c) 2020. Giuseppe Attardi (attardi@di.unipi.it).
+#  Copyright (c) 2024. Shota Kato (shota@human.sys.i.kyoto-u.ac.jp).
 # =============================================================================
 #  This file is part of Tanl.
 #
@@ -112,6 +112,23 @@ def clean(extractor, text, expand_templates=False, html_safe=True):
         # Drop transclusions (template, parser functions)
         text = dropNested(text, r"{{", r"}}")
 
+    # Already checked that math contents do not contain r"{{...}}"
+    # Collect math contents
+    formulas_all = []
+    pattern, placeholder = placeholder_math_tag
+    for index, match in enumerate(pattern.finditer(text)):
+        match_ = match.group()
+        placeholder_ = "%s_%d_" % (placeholder, index)  # e.g., formula_1_
+        text = text.replace(match_, placeholder_)
+        formulas_all.append(
+            {"placeholder": placeholder_, "text": unescape(match_)}
+        )
+    # Collect math parts was placed here because
+    # `dropNested(text, r"{\|", r"\|}")` deletes part of the math contents
+    # along with the following table.
+    # e.g., `\frac{|J|...{\| (table) \|}`: the text after \frac is deleted.
+    # this sample is from (https://en.wikipedia.org/wiki?curid=12316).
+
     # Drop tables
     text = dropNested(text, r"{\|", r"\|}")
 
@@ -179,16 +196,24 @@ def clean(extractor, text, expand_templates=False, html_safe=True):
         # Turn into text what is left (&amp;nbsp;) and <syntaxhighlight>
         text = unescape(text)
 
-    formula_dict = {}
+    # Expand placeholder for code
+    pattern, placeholder = placeholder_code_tag
+    for index, match in enumerate(pattern.finditer(text)):
+        text = text.replace(match.group(), "%s_%d" % (placeholder, index))
 
-    # Expand placeholders
-    for pattern, placeholder in placeholder_tag_patterns:
-        index = 1
-        for match in pattern.finditer(text):
-            match_ = match.group()
-            if placeholder == "formula":
-                formula_dict["%s_%d" % (placeholder, index)] = match_
-            text = text.replace(match_, "%s_%d" % (placeholder, index))
+    # Reindex formulas
+    # This is used because some of first extracted formulas were deleted.
+    # formulas_all[i]["placeholder"] is end with "_i_"
+    # to avoid conflict such as "formula_1" and "formula_10".
+    _, placeholder = placeholder_math_tag
+    formulas = []
+    index = 0
+    for formula in formulas_all:
+        if formula["placeholder"] in text:
+            formulas.append({"math_id": index, "text": formula["text"]})
+            text = text.replace(
+                formula["placeholder"], "%s_%d" % (placeholder, index)
+            )
             index += 1
 
     text = text.replace("<<", "«").replace(">>", "»")
@@ -207,7 +232,7 @@ def clean(extractor, text, expand_templates=False, html_safe=True):
     text = text.replace(",,", ",").replace(",.", ".")
     if html_safe:
         text = html.escape(text, quote=False)
-    return text, formula_dict
+    return text, formulas
 
 
 # skip level 1, it is page name level
@@ -763,7 +788,7 @@ ignoredTags = (
     "var",
 )
 
-placeholder_tags = {"math": "formula", "code": "codice"}
+# placeholder_tags = {"math": "formula", "code": "codice"}
 
 
 def normalizeTitle(title):
@@ -845,11 +870,6 @@ def ignoreTag(tag):
     ignored_tag_patterns.append((left, right))
 
 
-def resetIgnoredTags():
-    global ignored_tag_patterns
-    ignored_tag_patterns = []
-
-
 for tag in ignoredTags:
     ignoreTag(tag)
 
@@ -860,16 +880,23 @@ selfClosing_tag_patterns = [
 ]
 
 # Match HTML placeholder tags
-placeholder_tag_patterns = [
-    (
-        re.compile(
-            r"<\s*%s(\s*| [^>]+?)>.*?<\s*/\s*%s\s*>" % (tag, tag),
-            re.DOTALL | re.IGNORECASE,
-        ),
-        repl,
-    )
-    for tag, repl in placeholder_tags.items()
-]
+placeholder_code_tag = (
+    re.compile(
+        r"<\s*%s(\s*| [^>]+?)>.*?<\s*/\s*%s\s*>" % ("code", "code"),
+        re.DOTALL | re.IGNORECASE,
+    ),
+    "codice",
+)
+
+placeholder_math_tag = (
+    re.compile(
+        r"&lt;\s*%s(\s*| [^>]+?)&gt;.*?&lt;\s*/\s*%s\s*&gt;"
+        % ("math", "math"),
+        re.DOTALL | re.IGNORECASE,
+    ),
+    "formula",
+)
+
 
 # Match preformatted lines
 preformatted = re.compile(r"^ .*?$")
@@ -1074,12 +1101,12 @@ class Extractor:
         self.magicWords["currenthour"] = time.strftime("%H")
         self.magicWords["currenttime"] = time.strftime("%H:%M:%S")
 
-        text, formula_dict = clean(
+        text, formulas = clean(
             self, text, expand_templates=expand_templates, html_safe=html_safe
         )
 
         text = compact(text, mark_headers=mark_headers)
-        return text, formula_dict
+        return text, formulas
 
     def extract(self, out, html_safe=True):
         """
@@ -1088,7 +1115,7 @@ class Extractor:
         """
         logging.debug("%s\t%s", self.id, self.title)
         text = "".join(self.page)
-        text, formula_dict = self.clean_text(text, html_safe=html_safe)
+        text, formulas = self.clean_text(text, html_safe=html_safe)
 
         if self.to_json:
             json_data = {
@@ -1097,7 +1124,7 @@ class Extractor:
                 "url": self.url,
                 "title": self.title,
                 "text": "\n".join(text),
-                "formulas": formula_dict,
+                "formulas": formulas,
             }
             out_str = json.dumps(json_data)
             out.write(out_str)
@@ -1127,7 +1154,7 @@ class Extractor:
                 "Template errors in article '%s' (%s): title(%d) recursion(%d, %d, %d)",
                 self.title,
                 self.id,
-                *errs
+                *errs,
             )
 
     # ----------------------------------------------------------------------
