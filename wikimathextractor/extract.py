@@ -105,7 +105,8 @@ def clean(extractor, text, expand_templates=False, html_safe=True):
     """
 
     # remove html comments, which avoid extraction of <math> in comments
-    text = comment.sub("", text)
+    comment_raw = re.compile(r"&lt;!--.*?--&gt;", re.DOTALL)
+    text = comment_raw.sub("", text)
 
     # Collect math contents
     formulas_all = []
